@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Weight Deficit Tracker</title>
+  <title>Daily Deficit Tracker</title>
   <style>
     :root {
       --bg: #0f172a;
@@ -36,20 +36,20 @@
 
     .container {
       width: 100%;
-      max-width: 500px;
+      max-width: 480px;
       display: flex;
       flex-direction: column;
       gap: 16px;
-      padding-bottom: 30px;
+      padding-bottom: 24px;
     }
 
     header {
       text-align: center;
-      padding: 8px 0;
+      padding: 6px 0;
     }
 
     header h1 {
-      font-size: 1.5rem;
+      font-size: 1.4rem;
       font-weight: 700;
       letter-spacing: -0.5px;
     }
@@ -57,13 +57,13 @@
     header p {
       font-size: 0.85rem;
       color: var(--text-muted);
-      margin-top: 4px;
+      margin-top: 2px;
     }
 
     .card {
       background: var(--card-bg);
       border: 1px solid var(--border);
-      border-radius: 16px;
+      border-radius: 14px;
       padding: 16px;
       box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
     }
@@ -76,22 +76,8 @@
       overflow: hidden;
     }
 
-    .highlight-card::before {
-      content: "";
-      position: absolute;
-      top: -50px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 150px;
-      height: 150px;
-      background: var(--accent-glow);
-      filter: blur(50px);
-      border-radius: 50%;
-      pointer-events: none;
-    }
-
     .stat-label {
-      font-size: 0.8rem;
+      font-size: 0.75rem;
       text-transform: uppercase;
       letter-spacing: 0.05em;
       color: var(--text-muted);
@@ -120,170 +106,4 @@
       text-align: center;
       padding: 12px;
       background: rgba(15, 23, 42, 0.5);
-      border-radius: 12px;
-      border: 1px solid var(--border);
-    }
-
-    .grid-stat .stat-value {
-      font-size: 1.25rem;
-    }
-
-    .badge {
-      display: inline-block;
-      padding: 4px 10px;
-      border-radius: 9999px;
-      font-size: 0.75rem;
-      font-weight: 700;
-      margin-top: 8px;
-    }
-
-    .badge-on-track { background: rgba(52, 211, 153, 0.15); color: var(--success); border: 1px solid var(--success); }
-    .badge-adjust { background: rgba(251, 191, 36, 0.15); color: var(--warning); border: 1px solid var(--warning); }
-    .badge-urgent { background: rgba(248, 113, 113, 0.15); color: var(--danger); border: 1px solid var(--danger); }
-
-    label {
-      display: block;
-      font-size: 0.85rem;
-      font-weight: 600;
-      margin-bottom: 6px;
-      color: var(--text-muted);
-    }
-
-    input[type="number"], input[type="date"] {
-      width: 100%;
-      padding: 12px 14px;
-      background: #0f172a;
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      color: var(--text);
-      font-size: 1rem;
-      outline: none;
-      transition: border-color 0.2s;
-    }
-
-    input:focus {
-      border-color: var(--accent);
-    }
-
-    .btn {
-      width: 100%;
-      padding: 12px;
-      background: var(--accent);
-      color: #0f172a;
-      font-weight: 700;
-      font-size: 0.95rem;
-      border: none;
-      border-radius: 10px;
-      cursor: pointer;
-      margin-top: 12px;
-      transition: opacity 0.2s;
-    }
-
-    .btn:active {
-      opacity: 0.8;
-    }
-
-    .btn-secondary {
-      background: transparent;
-      color: var(--text-muted);
-      border: 1px solid var(--border);
-      margin-top: 8px;
-      font-weight: 600;
-      font-size: 0.85rem;
-    }
-
-    .history-list {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      max-height: 240px;
-      overflow-y: auto;
-      margin-top: 10px;
-    }
-
-    .history-item {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 10px 12px;
-      background: rgba(15, 23, 42, 0.4);
-      border-radius: 8px;
-      font-size: 0.85rem;
-      border: 1px solid #33415550;
-    }
-
-    .history-item .del-btn {
-      background: none;
-      border: none;
-      color: var(--danger);
-      font-size: 0.85rem;
-      cursor: pointer;
-      padding: 4px;
-      margin-left: 8px;
-    }
-
-    canvas {
-      width: 100%;
-      height: 160px;
-      margin-top: 10px;
-      display: block;
-    }
-  </style>
-</head>
-<body>
-
-<div class="container">
-  <header>
-    <h1>Dynamic Deficit Tracker</h1>
-    <p>Target Deadline: <strong>11th January 2027</strong></p>
-  </header>
-
-  <!-- Tomorrow's Target Requirement -->
-  <div class="card highlight-card">
-    <div class="stat-label">Required Loss for Tomorrow</div>
-    <div class="stat-value" id="dailyRequired">-0.65 lbs</div>
-    <div class="stat-sub">Tomorrow's scale target: <strong id="nextTargetWeight">-- lbs</strong></div>
-    <div id="statusBadge" class="badge badge-on-track">On Track</div>
-  </div>
-
-  <!-- Key Metrics Overview -->
-  <div class="grid-2">
-    <div class="card grid-stat">
-      <div class="stat-label">Days Left</div>
-      <div class="stat-value" id="daysRemaining">--</div>
-      <div class="stat-sub">Until 11th Jan</div>
-    </div>
-    <div class="card grid-stat">
-      <div class="stat-label">Remaining to Lose</div>
-      <div class="stat-value" id="totalRemaining">-- lbs</div>
-      <div class="stat-sub" id="goalTargetSub">Target: -- lbs</div>
-    </div>
-  </div>
-
-  <!-- Daily Weight Check-In -->
-  <div class="card">
-    <div class="stat-label" style="margin-bottom: 12px;">Log Today's Weight</div>
-    <div style="display: flex; flex-direction: column; gap: 10px;">
-      <div>
-        <label for="weighDate">Date</label>
-        <input type="date" id="weighDate">
-      </div>
-      <div>
-        <label for="weighWeight">Weight (lbs)</label>
-        <input type="number" id="weighWeight" step="0.1" placeholder="e.g. 195.4">
-      </div>
-      <button class="btn" id="saveLogBtn">Save Check-In</button>
-    </div>
-  </div>
-
-  <!-- Progress Chart -->
-  <div class="card">
-    <div class="stat-label">Weight Trajectory</div>
-    <canvas id="weightChart"></canvas>
-  </div>
-
-  <!-- Entry History -->
-  <div class="card">
-    <div style="display: flex; justify-content: space-between; align-items: center;">
-      <div class="stat-label">Logged Entries</div>
-      <span style="font-size: 0.75rem; color: var(--text-muted);"
+      border-
