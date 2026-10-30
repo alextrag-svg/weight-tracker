@@ -1,0 +1,887 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dynamic 11-Week Weight Loss Tracker</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    input[type=number]::-webkit-inner-spin-button, 
+    input[type=number]::-webkit-outer-spin-button { 
+      -webkit-appearance: none; 
+      margin: 0; 
+    }
+    input[type=number] { -moz-appearance: textfield; }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background-color: #cbd5e1;
+      border-radius: 9999px;
+    }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen antialiased selection:bg-indigo-500 selection:text-white">
+
+  <!-- Ambient Glow Effects -->
+  <div class="fixed top-0 left-1/2 -translate-x-1/2 w-full max-w-5xl h-64 bg-gradient-to-b from-indigo-500/10 via-teal-500/5 to-transparent blur-3xl pointer-events-none -z-10"></div>
+
+  <!-- Header -->
+  <header class="border-b border-slate-800/80 bg-slate-900/60 backdrop-blur-md sticky top-0 z-30">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 py-4 flex flex-wrap items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-teal-400 flex items-center justify-center shadow-lg shadow-indigo-500/20 text-white font-bold text-lg">
+          ⚖️
+        </div>
+        <div>
+          <h1 class="text-lg font-bold tracking-tight text-white flex items-center gap-2">
+            Dynamic Target Tracker
+            <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">11 Weeks (77 Days)</span>
+          </h1>
+          <p class="text-xs text-slate-400">Target loss rate: 0.65 lbs/day · Total goal: 50.05 lbs</p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <button id="openSettingsBtn" class="px-3.5 py-1.5 rounded-lg border border-slate-700 bg-slate-800/70 hover:bg-slate-700 text-slate-200 text-xs font-medium transition shadow-sm flex items-center gap-1.5">
+          <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+          Program Plan
+        </button>
+        <button id="resetDataBtn" class="px-3.5 py-1.5 rounded-lg border border-red-900/40 bg-red-950/30 hover:bg-red-900/40 text-red-300 text-xs font-medium transition shadow-sm">
+          Reset
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-6xl mx-auto px-4 sm:px-6 py-6 space-y-6">
+
+    <!-- Recalculation Alert Banner -->
+    <div id="dynamicAdviceCard" class="relative overflow-hidden rounded-2xl p-5 border shadow-xl transition-all">
+      <div class="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+        <div class="space-y-1">
+          <div class="flex items-center gap-2">
+            <span id="statusBadge" class="text-xs uppercase font-extrabold tracking-wider px-2.5 py-1 rounded-md">Status</span>
+            <span id="headlineDaysRemaining" class="text-xs text-slate-400">Day X of 77</span>
+          </div>
+          <h2 id="dynamicTargetTitle" class="text-xl sm:text-2xl font-bold tracking-tight text-white">
+            Daily Required Loss Rate
+          </h2>
+          <p id="dynamicTargetDescription" class="text-sm text-slate-300 max-w-2xl leading-relaxed">
+            Loading trajectory analysis...
+          </p>
+        </div>
+
+        <div class="flex flex-row md:flex-col items-center md:items-end justify-between w-full md:w-auto p-4 bg-slate-900/60 rounded-xl border border-slate-800/80 shrink-0 gap-3">
+          <div class="text-left md:text-right">
+            <div class="text-xs text-slate-400 uppercase font-medium">Tomorrow's Target Weight</div>
+            <div id="nextTargetWeightVal" class="text-2xl font-extrabold text-teal-400">-- lbs</div>
+          </div>
+          <div class="text-right">
+            <div class="text-xs text-slate-400 uppercase font-medium">Daily Need</div>
+            <div id="requiredRateVal" class="text-sm font-semibold text-amber-300">-- lbs/day</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Metric Cards Grid -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div class="bg-slate-900/70 border border-slate-800/80 rounded-xl p-4 shadow-sm">
+        <div class="text-xs font-medium text-slate-400 uppercase tracking-wider">Start & Goal Weight</div>
+        <div class="mt-2 flex items-baseline gap-2">
+          <span id="cardStartWeight" class="text-xl font-bold text-white">--</span>
+          <span class="text-xs text-slate-400">→</span>
+          <span id="cardGoalWeight" class="text-xl font-bold text-teal-400">--</span>
+        </div>
+        <div class="mt-1 text-xs text-slate-500">Fixed target: -50.05 lbs</div>
+      </div>
+
+      <div class="bg-slate-900/70 border border-slate-800/80 rounded-xl p-4 shadow-sm">
+        <div class="text-xs font-medium text-slate-400 uppercase tracking-wider">Current Weight</div>
+        <div class="mt-2 flex items-baseline gap-2">
+          <span id="cardCurrentWeight" class="text-2xl font-black text-white">--</span>
+          <span id="cardWeightDiff" class="text-xs font-semibold">--</span>
+        </div>
+        <div id="cardRemainingToGoal" class="mt-1 text-xs text-slate-400">Remaining: -- lbs</div>
+      </div>
+
+      <div class="bg-slate-900/70 border border-slate-800/80 rounded-xl p-4 shadow-sm">
+        <div class="text-xs font-medium text-slate-400 uppercase tracking-wider">Timeline Horizon</div>
+        <div class="mt-2 flex items-baseline gap-2">
+          <span id="cardDaysRemaining" class="text-2xl font-black text-indigo-400">--</span>
+          <span class="text-xs text-slate-400">days left</span>
+        </div>
+        <div id="cardTargetDate" class="mt-1 text-xs text-slate-400">Ends: --</div>
+      </div>
+
+      <div class="bg-slate-900/70 border border-slate-800/80 rounded-xl p-4 shadow-sm">
+        <div class="text-xs font-medium text-slate-400 uppercase tracking-wider">Journey Progress</div>
+        <div class="mt-2 flex items-baseline gap-2">
+          <span id="cardProgressPercent" class="text-2xl font-black text-teal-300">0%</span>
+          <span id="cardLostSoFar" class="text-xs font-semibold text-teal-400">0.0 lbs lost</span>
+        </div>
+        <div class="mt-2 w-full bg-slate-800 h-2 rounded-full overflow-hidden">
+          <div id="cardProgressBar" class="h-full bg-gradient-to-r from-indigo-500 to-teal-400 rounded-full transition-all duration-500" style="width: 0%"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Section: Log input + Chart & Table -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+      <!-- Weigh-in Form Panel -->
+      <div class="lg:col-span-1 bg-slate-900/70 border border-slate-800/80 rounded-2xl p-5 shadow-sm space-y-5">
+        <div>
+          <h3 class="text-base font-semibold text-white flex items-center gap-2">
+            <svg class="w-4 h-4 text-teal-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+            Record Weigh-In
+          </h3>
+          <p class="text-xs text-slate-400 mt-0.5">Weigh yourself first thing in the morning consistently.</p>
+        </div>
+
+        <form id="logWeightForm" class="space-y-4">
+          <div>
+            <label for="logDate" class="block text-xs font-medium text-slate-300 mb-1">Date</label>
+            <input type="date" id="logDate" required class="w-full bg-slate-950 border border-slate-700/80 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500">
+          </div>
+
+          <div>
+            <label for="logWeight" class="block text-xs font-medium text-slate-300 mb-1">Weight (lbs)</label>
+            <div class="relative">
+              <input type="number" step="0.1" min="50" max="600" id="logWeight" placeholder="e.g. 195.4" required class="w-full bg-slate-950 border border-slate-700/80 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500">
+              <span class="absolute right-3 top-2.5 text-xs text-slate-500">lbs</span>
+            </div>
+          </div>
+
+          <div>
+            <label for="logNotes" class="block text-xs font-medium text-slate-300 mb-1">Notes (Optional)</label>
+            <input type="text" id="logNotes" placeholder="e.g. Salty dinner, well hydrated" class="w-full bg-slate-950 border border-slate-700/80 rounded-lg px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500">
+          </div>
+
+          <button type="submit" class="w-full bg-gradient-to-r from-indigo-500 to-teal-500 hover:from-indigo-600 hover:to-teal-600 text-white font-medium py-2.5 px-4 rounded-lg text-sm shadow-md transition active:scale-[0.99] flex items-center justify-center gap-2">
+            Save Daily Weight
+          </button>
+        </form>
+
+        <!-- Quick Insight Box -->
+        <div class="p-3.5 rounded-xl bg-slate-950/70 border border-slate-800 text-xs space-y-1.5">
+          <div class="font-semibold text-slate-300 flex items-center gap-1.5">
+            <span>💡</span> Pro tip on daily weight fluctuations:
+          </div>
+          <p class="text-slate-400 leading-relaxed">
+            Water retention, carb intake, digestion, and sodium cause 1–3 lbs fluctuations daily. The dynamic calculator adjusts tomorrow's target immediately so you never lose control of the 77-day deadline.
+          </p>
+        </div>
+      </div>
+
+      <!-- Trend Chart & Historical Table -->
+      <div class="lg:col-span-2 space-y-6">
+
+        <!-- Chart Container -->
+        <div class="bg-slate-900/70 border border-slate-800/80 rounded-2xl p-5 shadow-sm space-y-3">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <div>
+              <h3 class="text-base font-semibold text-white">Trajectory vs. Actual</h3>
+              <p class="text-xs text-slate-400">Comparing your daily entries against ideal 0.65 lbs/day slope</p>
+            </div>
+            <div class="flex items-center gap-4 text-xs">
+              <div class="flex items-center gap-1.5">
+                <span class="w-3 h-0.5 bg-teal-400 rounded-full inline-block"></span>
+                <span class="text-slate-300">Actual Weight</span>
+              </div>
+              <div class="flex items-center gap-1.5">
+                <span class="w-3 h-0.5 border-t border-dashed border-indigo-400 inline-block"></span>
+                <span class="text-slate-400">Target Line</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Canvas Chart -->
+          <div class="relative w-full h-64 bg-slate-950/50 rounded-xl p-2 border border-slate-800/60">
+            <canvas id="weightChart" class="w-full h-full block"></canvas>
+          </div>
+        </div>
+
+        <!-- History Table -->
+        <div class="bg-slate-900/70 border border-slate-800/80 rounded-2xl p-5 shadow-sm space-y-3">
+          <div class="flex items-center justify-between">
+            <div>
+              <h3 class="text-base font-semibold text-white">Daily History & Calculated Demands</h3>
+              <p class="text-xs text-slate-400">See how your daily requirement dynamically shifted each day</p>
+            </div>
+            <span id="logCountBadge" class="text-xs px-2.5 py-1 bg-slate-800 text-slate-300 rounded-full font-medium">0 logs</span>
+          </div>
+
+          <div class="overflow-x-auto custom-scrollbar rounded-xl border border-slate-800">
+            <table class="w-full text-left text-xs text-slate-300">
+              <thead class="bg-slate-950/80 text-slate-400 border-b border-slate-800 uppercase tracking-wider font-semibold">
+                <tr>
+                  <th class="py-2.5 px-3">Date</th>
+                  <th class="py-2.5 px-3">Weight</th>
+                  <th class="py-2.5 px-3">Daily Δ</th>
+                  <th class="py-2.5 px-3">Total Δ</th>
+                  <th class="py-2.5 px-3">Remaining Daily Rate</th>
+                  <th class="py-2.5 px-3">Notes</th>
+                  <th class="py-2.5 px-3 text-right">Action</th>
+                </tr>
+              </thead>
+              <tbody id="logsTableBody" class="divide-y divide-slate-800/60 font-mono">
+                <!-- Dynamically populated -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Safety and Guidance Notice -->
+    <div class="rounded-xl border border-amber-500/20 bg-amber-500/5 p-4 text-slate-300 text-xs leading-relaxed flex items-start gap-3">
+      <span class="text-amber-400 text-base leading-none">⚠️</span>
+      <div class="space-y-1">
+        <strong class="font-semibold text-amber-300">Important Health & Caloric Deficit Advisory:</strong>
+        <p class="text-slate-400">
+          Targeting a 0.65 lbs/day loss equates to roughly <strong>4.55 lbs/week</strong>, demanding a severe daily caloric deficit of approximately <strong>~2,275 kcal/day</strong> (since 1 lb of body mass represents ~3,500 calories). 
+          Standard medical guidelines typically recommend 1–2 lbs/week. A rapid pace carries risks of lean muscle loss, micronutrient depletion, gallstones, and metabolic fatigue. 
+          Prioritize adequate hydration, adequate protein (0.8–1g/lb of lean mass), electrolyte balance, and consult a qualified medical physician or registered dietitian before initiating an intense restriction.
+        </p>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Modal: Initial Setup / Settings -->
+  <div id="settingsModal" class="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-6 shadow-2xl relative">
+      <h3 class="text-lg font-bold text-white mb-1">Target Configuration</h3>
+      <p class="text-xs text-slate-400 mb-5">Define your starting coordinates for the 77-day (11 weeks) program.</p>
+
+      <form id="settingsForm" class="space-y-4">
+        <div>
+          <label for="setupStartWeight" class="block text-xs font-medium text-slate-300 mb-1">Starting Weight (lbs)</label>
+          <div class="relative">
+            <input type="number" step="0.1" min="50" max="600" id="setupStartWeight" required class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-indigo-500">
+            <span class="absolute right-3 top-2.5 text-xs text-slate-500">lbs</span>
+          </div>
+        </div>
+
+        <div>
+          <label for="setupStartDate" class="block text-xs font-medium text-slate-300 mb-1">Start Date</label>
+          <input type="date" id="setupStartDate" required class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-indigo-500">
+        </div>
+
+        <div class="bg-slate-950/60 p-3 rounded-lg border border-slate-800 text-xs space-y-1">
+          <div class="flex justify-between text-slate-400">
+            <span>Program Length:</span>
+            <span class="text-slate-200 font-semibold">11 Weeks (77 Days)</span>
+          </div>
+          <div class="flex justify-between text-slate-400">
+            <span>Daily Rate:</span>
+            <span class="text-slate-200 font-semibold">0.65 lbs/day</span>
+          </div>
+          <div class="flex justify-between text-slate-400">
+            <span>Total Reduction:</span>
+            <span class="text-teal-400 font-semibold">-50.05 lbs</span>
+          </div>
+        </div>
+
+        <div class="flex items-center justify-end gap-3 pt-3">
+          <button type="button" id="closeSettingsBtn" class="px-4 py-2 rounded-lg text-slate-400 hover:text-slate-200 text-xs font-medium transition">
+            Cancel
+          </button>
+          <button type="submit" class="px-5 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-medium shadow-md transition">
+            Save Program
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="fixed bottom-5 right-5 z-50 bg-slate-900 border border-slate-700 text-slate-200 px-4 py-3 rounded-xl shadow-2xl text-xs flex items-center gap-2 transition-all duration-300 opacity-0 translate-y-4 pointer-events-none">
+    <span id="toastIcon">ℹ️</span>
+    <span id="toastMessage">Notification message</span>
+  </div>
+
+  <script>
+    // Constants
+    const TOTAL_DAYS = 77;
+    const TARGET_LOSS_RATE = 0.65;
+    const TOTAL_TARGET_LOSS = TOTAL_DAYS * TARGET_LOSS_RATE; // 50.05 lbs
+    const STORAGE_KEY = 'weight_tracker_11weeks_v1';
+
+    // Application State
+    let appState = {
+      startWeight: 200.0,
+      startDate: new Date().toISOString().split('T')[0],
+      logs: [] // Array of { id, date, weight, notes }
+    };
+
+    // DOM Elements
+    const settingsModal = document.getElementById('settingsModal');
+    const settingsForm = document.getElementById('settingsForm');
+    const openSettingsBtn = document.getElementById('openSettingsBtn');
+    const closeSettingsBtn = document.getElementById('closeSettingsBtn');
+    const resetDataBtn = document.getElementById('resetDataBtn');
+
+    const logWeightForm = document.getElementById('logWeightForm');
+    const logDateInput = document.getElementById('logDate');
+    const logWeightInput = document.getElementById('logWeight');
+    const logNotesInput = document.getElementById('logNotes');
+    const logsTableBody = document.getElementById('logsTableBody');
+    const logCountBadge = document.getElementById('logCountBadge');
+
+    // Display metric nodes
+    const dynamicAdviceCard = document.getElementById('dynamicAdviceCard');
+    const statusBadge = document.getElementById('statusBadge');
+    const headlineDaysRemaining = document.getElementById('headlineDaysRemaining');
+    const dynamicTargetTitle = document.getElementById('dynamicTargetTitle');
+    const dynamicTargetDescription = document.getElementById('dynamicTargetDescription');
+    const nextTargetWeightVal = document.getElementById('nextTargetWeightVal');
+    const requiredRateVal = document.getElementById('requiredRateVal');
+
+    const cardStartWeight = document.getElementById('cardStartWeight');
+    const cardGoalWeight = document.getElementById('cardGoalWeight');
+    const cardCurrentWeight = document.getElementById('cardCurrentWeight');
+    const cardWeightDiff = document.getElementById('cardWeightDiff');
+    const cardRemainingToGoal = document.getElementById('cardRemainingToGoal');
+    const cardDaysRemaining = document.getElementById('cardDaysRemaining');
+    const cardTargetDate = document.getElementById('cardTargetDate');
+    const cardProgressPercent = document.getElementById('cardProgressPercent');
+    const cardLostSoFar = document.getElementById('cardLostSoFar');
+    const cardProgressBar = document.getElementById('cardProgressBar');
+
+    const chartCanvas = document.getElementById('weightChart');
+    let chartCtx = chartCanvas.getContext('2d');
+
+    // Utility: Show Toast
+    function showToast(msg, icon = '✅') {
+      const toast = document.getElementById('toast');
+      const toastMsg = document.getElementById('toastMessage');
+      const toastIcon = document.getElementById('toastIcon');
+
+      toastMsg.textContent = msg;
+      toastIcon.textContent = icon;
+      toast.classList.remove('opacity-0', 'translate-y-4', 'pointer-events-none');
+      toast.classList.add('opacity-100', 'translate-y-0');
+
+      setTimeout(() => {
+        toast.classList.add('opacity-0', 'translate-y-4', 'pointer-events-none');
+        toast.classList.remove('opacity-100', 'translate-y-0');
+      }, 3000);
+    }
+
+    // Date Helpers
+    function parseDate(dateStr) {
+      const parts = dateStr.split('-');
+      return new Date(parts[0], parts[1] - 1, parts[2]);
+    }
+
+    function addDays(date, days) {
+      const result = new Date(date);
+      result.setDate(result.getDate() + days);
+      return result;
+    }
+
+    function diffInDays(start, end) {
+      const oneDay = 1000 * 60 * 60 * 24;
+      return Math.round((end - start) / oneDay);
+    }
+
+    function formatDateDisplay(dateObj) {
+      return dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    }
+
+    // Persistence
+    function loadState() {
+      try {
+        const stored = localStorage.getItem(STORAGE_KEY);
+        if (stored) {
+          appState = JSON.parse(stored);
+        } else {
+          // Pre-populate with a reasonable default start
+          const today = new Date().toISOString().split('T')[0];
+          appState = {
+            startWeight: 200.0,
+            startDate: today,
+            logs: [
+              { id: Date.now().toString(), date: today, weight: 200.0, notes: "Kickoff day" }
+            ]
+          };
+          saveState();
+        }
+      } catch (e) {
+        console.error('Error reading localStorage', e);
+      }
+    }
+
+    function saveState() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
+      } catch (e) {
+        console.error('Error saving state', e);
+      }
+    }
+
+    // Calculations
+    function getCalculations() {
+      const startDate = parseDate(appState.startDate);
+      const endDate = addDays(startDate, TOTAL_DAYS);
+      const goalWeight = +(appState.startWeight - TOTAL_TARGET_LOSS).toFixed(2);
+
+      // Sort logs by date ascending
+      const sortedLogs = [...appState.logs].sort((a, b) => parseDate(a.date) - parseDate(b.date));
+
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      // Most recent entry or start weight
+      const latestLog = sortedLogs.length > 0 ? sortedLogs[sortedLogs.length - 1] : null;
+      const currentWeight = latestLog ? latestLog.weight : appState.startWeight;
+      const latestDate = latestLog ? parseDate(latestLog.date) : startDate;
+
+      // Days elapsed from start relative to the latest log or current day
+      const daysElapsedFromStart = Math.max(0, diffInDays(startDate, latestDate));
+      const remainingDays = Math.max(0, TOTAL_DAYS - daysElapsedFromStart);
+
+      // Remaining weight to lose to hit goalWeight
+      const remainingToLose = Math.max(0, +(currentWeight - goalWeight).toFixed(2));
+      const totalLostSoFar = +(appState.startWeight - currentWeight).toFixed(2);
+
+      // Dynamic required loss rate
+      let requiredLossRate = 0;
+      if (remainingDays > 0) {
+        requiredLossRate = +(remainingToLose / remainingDays).toFixed(3);
+      } else {
+        requiredLossRate = remainingToLose;
+      }
+
+      // Expected ideal weight for today/latest log date
+      const idealWeightForDay = +(appState.startWeight - (daysElapsedFromStart * TARGET_LOSS_RATE)).toFixed(2);
+      const deltaVsIdeal = +(currentWeight - idealWeightForDay).toFixed(2); // positive = heavier than ideal
+
+      // Tomorrow's target
+      const tomorrowTarget = remainingDays > 0 ? +(currentWeight - requiredLossRate).toFixed(2) : goalWeight;
+
+      return {
+        startDate,
+        endDate,
+        goalWeight,
+        sortedLogs,
+        latestLog,
+        currentWeight,
+        latestDate,
+        daysElapsedFromStart,
+        remainingDays,
+        remainingToLose,
+        totalLostSoFar,
+        requiredLossRate,
+        idealWeightForDay,
+        deltaVsIdeal,
+        tomorrowTarget
+      };
+    }
+
+    // Render Metrics and UI
+    function render() {
+      const calc = getCalculations();
+
+      // Top Cards
+      cardStartWeight.textContent = `${appState.startWeight.toFixed(1)} lbs`;
+      cardGoalWeight.textContent = `${calc.goalWeight.toFixed(1)} lbs`;
+      cardCurrentWeight.textContent = `${calc.currentWeight.toFixed(1)} lbs`;
+
+      if (calc.totalLostSoFar >= 0) {
+        cardWeightDiff.textContent = `-${calc.totalLostSoFar.toFixed(1)} lbs`;
+        cardWeightDiff.className = "text-xs font-semibold text-teal-400";
+      } else {
+        cardWeightDiff.textContent = `+${Math.abs(calc.totalLostSoFar).toFixed(1)} lbs`;
+        cardWeightDiff.className = "text-xs font-semibold text-rose-400";
+      }
+
+      cardRemainingToGoal.textContent = `Remaining: ${calc.remainingToLose.toFixed(1)} lbs`;
+      cardDaysRemaining.textContent = calc.remainingDays;
+      cardTargetDate.textContent = `Ends: ${formatDateDisplay(calc.endDate)}`;
+
+      // Progress bar
+      const progressPercent = Math.min(100, Math.max(0, (calc.totalLostSoFar / TOTAL_TARGET_LOSS) * 100));
+      cardProgressPercent.textContent = `${progressPercent.toFixed(1)}%`;
+      cardLostSoFar.textContent = `${calc.totalLostSoFar.toFixed(1)} lbs lost`;
+      cardProgressBar.style.width = `${progressPercent}%`;
+
+      // Status Assessment
+      headlineDaysRemaining.textContent = `Day ${calc.daysElapsedFromStart} of ${TOTAL_DAYS}`;
+      nextTargetWeightVal.textContent = `${calc.tomorrowTarget.toFixed(2)} lbs`;
+      requiredRateVal.textContent = `${calc.requiredLossRate.toFixed(2)} lbs/day`;
+
+      let badgeBg, badgeText, statusTitle, statusDesc, cardBorder;
+
+      if (calc.remainingDays === 0) {
+        badgeBg = "bg-purple-500/20 text-purple-300 border-purple-500/40";
+        badgeText = "Horizon Reached";
+        cardBorder = "border-purple-500/30 bg-purple-950/15";
+        statusTitle = calc.currentWeight <= calc.goalWeight ? "Goal Accomplished!" : "Program Completed";
+        statusDesc = `You've concluded the 77-day span. Final weight: ${calc.currentWeight.toFixed(1)} lbs (${calc.totalLostSoFar.toFixed(1)} lbs lost).`;
+      } else if (calc.deltaVsIdeal <= -1.0) {
+        badgeBg = "bg-teal-500/20 text-teal-300 border-teal-500/40";
+        badgeText = "Ahead of Schedule";
+        cardBorder = "border-teal-500/40 bg-teal-950/20";
+        statusTitle = "Crushing the Trajectory";
+        statusDesc = `You are ${Math.abs(calc.deltaVsIdeal).toFixed(1)} lbs ahead of the ideal 0.65 lbs/day slope. Your required daily burn now reduces to only ${calc.requiredLossRate.toFixed(2)} lbs/day to cross ${calc.goalWeight.toFixed(1)} lbs on schedule.`;
+      } else if (Math.abs(calc.deltaVsIdeal) <= 0.65) {
+        badgeBg = "bg-indigo-500/20 text-indigo-300 border-indigo-500/40";
+        badgeText = "On Track";
+        cardBorder = "border-indigo-500/30 bg-indigo-950/20";
+        statusTitle = "Right on Target";
+        statusDesc = `You're tracking in sync with the required rate. Maintain a steady ~${calc.requiredLossRate.toFixed(2)} lbs/day over your remaining ${calc.remainingDays} days to meet the final deadline.`;
+      } else if (calc.deltaVsIdeal <= 3.0) {
+        badgeBg = "bg-amber-500/20 text-amber-300 border-amber-500/40";
+        badgeText = "Adjustment Needed";
+        cardBorder = "border-amber-500/40 bg-amber-950/20";
+        statusTitle = "Pacing Slightly Behind";
+        statusDesc = `Because progress lagged or water retention occurred, your daily demand has increased to ${calc.requiredLossRate.toFixed(2)} lbs/day (previously 0.65). Aim for ${calc.tomorrowTarget.toFixed(2)} lbs tomorrow.`;
+      } else {
+        badgeBg = "bg-rose-500/20 text-rose-300 border-rose-500/40";
+        badgeText = "Significant Deficit Required";
+        cardBorder = "border-rose-500/40 bg-rose-950/20";
+        statusTitle = "Deficit Recalibration Critical";
+        statusDesc = `You are currently ${calc.deltaVsIdeal.toFixed(1)} lbs above schedule. Reaching your final goal by ${formatDateDisplay(calc.endDate)} now requires ${calc.requiredLossRate.toFixed(2)} lbs/day. Review caloric intake and hydration.`;
+      }
+
+      statusBadge.className = `text-xs uppercase font-extrabold tracking-wider px-2.5 py-1 rounded-md border ${badgeBg}`;
+      statusBadge.textContent = badgeText;
+      dynamicAdviceCard.className = `relative overflow-hidden rounded-2xl p-5 border shadow-xl transition-all ${cardBorder}`;
+      dynamicTargetTitle.textContent = statusTitle;
+      dynamicTargetDescription.textContent = statusDesc;
+
+      // Render Logs Table
+      renderTable(calc);
+
+      // Render Trajectory Chart
+      renderChart(calc);
+    }
+
+    function renderTable(calc) {
+      logsTableBody.innerHTML = '';
+      logCountBadge.textContent = `${calc.sortedLogs.length} logs`;
+
+      if (calc.sortedLogs.length === 0) {
+        logsTableBody.innerHTML = `
+          <tr>
+            <td colspan="7" class="py-6 text-center text-slate-500 text-xs font-sans">
+              No entries logged yet. Add your daily weigh-in above!
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      // Reverse so newest entries appear at top of table
+      const reversedLogs = [...calc.sortedLogs].reverse();
+
+      reversedLogs.forEach((log, index) => {
+        const logDateObj = parseDate(log.date);
+        const dayNum = diffInDays(calc.startDate, logDateObj);
+        const daysLeftFromThisLog = Math.max(0, TOTAL_DAYS - dayNum);
+
+        // Daily change relative to the preceding chronological log
+        const origIndex = calc.sortedLogs.findIndex(l => l.id === log.id);
+        let dailyChangeStr = '--';
+        let dailyChangeClass = 'text-slate-400';
+
+        if (origIndex > 0) {
+          const prevLog = calc.sortedLogs[origIndex - 1];
+          const diff = +(log.weight - prevLog.weight).toFixed(2);
+          if (diff < 0) {
+            dailyChangeStr = `${diff.toFixed(1)} lbs`;
+            dailyChangeClass = 'text-teal-400 font-semibold';
+          } else if (diff > 0) {
+            dailyChangeStr = `+${diff.toFixed(1)} lbs`;
+            dailyChangeClass = 'text-rose-400 font-semibold';
+          } else {
+            dailyChangeStr = '0.0 lbs';
+            dailyChangeClass = 'text-slate-400';
+          }
+        }
+
+        // Overall change relative to starting weight
+        const totalDelta = +(log.weight - appState.startWeight).toFixed(2);
+        const totalDeltaStr = totalDelta <= 0 ? `${totalDelta.toFixed(1)} lbs` : `+${totalDelta.toFixed(1)} lbs`;
+        const totalDeltaClass = totalDelta <= 0 ? 'text-teal-400' : 'text-rose-400';
+
+        // Dynamic rate calculated on that specific day
+        const remToLoseThatDay = Math.max(0, +(log.weight - calc.goalWeight).toFixed(2));
+        const rateThatDay = daysLeftFromThisLog > 0 ? (remToLoseThatDay / daysLeftFromThisLog).toFixed(2) : '--';
+
+        const row = document.createElement('tr');
+        row.className = "hover:bg-slate-800/40 transition";
+        row.innerHTML = `
+          <td class="py-3 px-3 text-slate-200">
+            <span class="font-medium">${log.date}</span>
+            <span class="text-[10px] text-slate-500 block font-sans">Day ${dayNum}</span>
+          </td>
+          <td class="py-3 px-3 font-semibold text-white">${log.weight.toFixed(1)} lbs</td>
+          <td class="py-3 px-3 ${dailyChangeClass}">${dailyChangeStr}</td>
+          <td class="py-3 px-3 ${totalDeltaClass}">${totalDeltaStr}</td>
+          <td class="py-3 px-3 text-amber-300 font-medium">${rateThatDay} ${rateThatDay !== '--' ? 'lbs/d' : ''}</td>
+          <td class="py-3 px-3 text-slate-400 font-sans max-w-[120px] truncate" title="${log.notes || ''}">${log.notes || '-'}</td>
+          <td class="py-3 px-3 text-right">
+            <button onclick="deleteLog('${log.id}')" class="text-slate-500 hover:text-rose-400 transition p-1 rounded font-sans" title="Delete entry">
+              <svg class="w-4 h-4 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+            </button>
+          </td>
+        `;
+        logsTableBody.appendChild(row);
+      });
+    }
+
+    // Chart Renderer using HTML5 Canvas
+    function renderChart(calc) {
+      const dpr = window.devicePixelRatio || 1;
+      const rect = chartCanvas.getBoundingClientRect();
+
+      chartCanvas.width = rect.width * dpr;
+      chartCanvas.height = rect.height * dpr;
+      chartCtx.scale(dpr, dpr);
+
+      const w = rect.width;
+      const h = rect.height;
+
+      chartCtx.clearRect(0, 0, w, h);
+
+      if (w === 0 || h === 0) return;
+
+      const padding = { top: 20, right: 30, bottom: 35, left: 45 };
+      const plotW = w - padding.left - padding.right;
+      const plotH = h - padding.top - padding.bottom;
+
+      // Min/Max weights for scaling
+      let minW = calc.goalWeight - 2;
+      let maxW = appState.startWeight + 2;
+
+      calc.sortedLogs.forEach(l => {
+        if (l.weight > maxW) maxW = l.weight + 2;
+        if (l.weight < minW) minW = l.weight - 2;
+      });
+
+      const weightRange = maxW - minW || 1;
+
+      // Coordinate transformers
+      function getX(day) {
+        return padding.left + (day / TOTAL_DAYS) * plotW;
+      }
+
+      function getY(weight) {
+        return padding.top + plotH - ((weight - minW) / weightRange) * plotH;
+      }
+
+      // Draw Grid Lines & Y-axis labels
+      chartCtx.lineWidth = 1;
+      chartCtx.strokeStyle = 'rgba(51, 65, 85, 0.4)';
+      chartCtx.fillStyle = '#64748b';
+      chartCtx.font = '10px Inter, sans-serif';
+      chartCtx.textAlign = 'right';
+
+      const ySteps = 5;
+      for (let i = 0; i <= ySteps; i++) {
+        const val = minW + (weightRange / ySteps) * i;
+        const y = getY(val);
+        chartCtx.beginPath();
+        chartCtx.moveTo(padding.left, y);
+        chartCtx.lineTo(w - padding.right, y);
+        chartCtx.stroke();
+        chartCtx.fillText(`${val.toFixed(0)}`, padding.left - 8, y + 3);
+      }
+
+      // Draw X-axis markings (Day 0, Day 20, Day 40, Day 60, Day 77)
+      chartCtx.textAlign = 'center';
+      const xMarkers = [0, 20, 40, 60, 77];
+      xMarkers.forEach(day => {
+        const x = getX(day);
+        chartCtx.beginPath();
+        chartCtx.moveTo(x, padding.top);
+        chartCtx.lineTo(x, padding.top + plotH);
+        chartCtx.strokeStyle = 'rgba(51, 65, 85, 0.25)';
+        chartCtx.stroke();
+        chartCtx.fillText(`D${day}`, x, h - padding.bottom + 16);
+      });
+
+      // 1. Draw Ideal Trajectory Line (Dashed)
+      chartCtx.beginPath();
+      chartCtx.setLineDash([4, 4]);
+      chartCtx.strokeStyle = '#818cf8'; // Indigo
+      chartCtx.lineWidth = 2;
+      chartCtx.moveTo(getX(0), getY(appState.startWeight));
+      chartCtx.lineTo(getX(TOTAL_DAYS), getY(calc.goalWeight));
+      chartCtx.stroke();
+      chartCtx.setLineDash([]); // Reset dash
+
+      // 2. Draw Actual Weight Trend Line
+      if (calc.sortedLogs.length > 0) {
+        // Build coordinates
+        const points = calc.sortedLogs.map(l => {
+          const day = diffInDays(calc.startDate, parseDate(l.date));
+          return {
+            x: getX(day),
+            y: getY(l.weight),
+            weight: l.weight,
+            day: day
+          };
+        });
+
+        // Area under curve gradient
+        chartCtx.beginPath();
+        chartCtx.moveTo(points[0].x, points[0].y);
+        for (let i = 1; i < points.length; i++) {
+          chartCtx.lineTo(points[i].x, points[i].y);
+        }
+        chartCtx.lineTo(points[points.length - 1].x, padding.top + plotH);
+        chartCtx.lineTo(points[0].x, padding.top + plotH);
+        chartCtx.closePath();
+
+        const grad = chartCtx.createLinearGradient(0, padding.top, 0, padding.top + plotH);
+        grad.addColorStop(0, 'rgba(45, 212, 191, 0.25)'); // Teal
+        grad.addColorStop(1, 'rgba(45, 212, 191, 0.0)');
+        chartCtx.fillStyle = grad;
+        chartCtx.fill();
+
+        // Stroke line
+        chartCtx.beginPath();
+        chartCtx.moveTo(points[0].x, points[0].y);
+        for (let i = 1; i < points.length; i++) {
+          chartCtx.lineTo(points[i].x, points[i].y);
+        }
+        chartCtx.strokeStyle = '#2dd4bf'; // Teal
+        chartCtx.lineWidth = 2.5;
+        chartCtx.stroke();
+
+        // Points
+        points.forEach((pt, i) => {
+          chartCtx.beginPath();
+          chartCtx.arc(pt.x, pt.y, i === points.length - 1 ? 4.5 : 3, 0, Math.PI * 2);
+          chartCtx.fillStyle = i === points.length - 1 ? '#38bdf8' : '#2dd4bf';
+          chartCtx.fill();
+          chartCtx.strokeStyle = '#020617';
+          chartCtx.lineWidth = 1.5;
+          chartCtx.stroke();
+        });
+      }
+    }
+
+    // Delete Log Helper
+    window.deleteLog = function(id) {
+      appState.logs = appState.logs.filter(l => l.id !== id);
+      saveState();
+      render();
+      showToast("Entry removed", "🗑️");
+    };
+
+    // Event Listeners
+    window.addEventListener('resize', () => {
+      const calc = getCalculations();
+      renderChart(calc);
+    });
+
+    logWeightForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const dateVal = logDateInput.value;
+      const weightVal = parseFloat(logWeightInput.value);
+      const notesVal = logNotesInput.value.trim();
+
+      if (!dateVal || isNaN(weightVal)) return;
+
+      // Check if entry for this date already exists
+      const existingIdx = appState.logs.findIndex(l => l.date === dateVal);
+      if (existingIdx >= 0) {
+        appState.logs[existingIdx].weight = weightVal;
+        appState.logs[existingIdx].notes = notesVal;
+        showToast(`Updated weight for ${dateVal}`);
+      } else {
+        appState.logs.push({
+          id: Date.now().toString(),
+          date: dateVal,
+          weight: weightVal,
+          notes: notesVal
+        });
+        showToast(`Logged ${weightVal.toFixed(1)} lbs`);
+      }
+
+      saveState();
+      render();
+
+      logWeightInput.value = '';
+      logNotesInput.value = '';
+    });
+
+    // Settings Modal Handlers
+    openSettingsBtn.addEventListener('click', () => {
+      document.getElementById('setupStartWeight').value = appState.startWeight;
+      document.getElementById('setupStartDate').value = appState.startDate;
+      settingsModal.classList.remove('hidden');
+    });
+
+    closeSettingsBtn.addEventListener('click', () => {
+      settingsModal.classList.add('hidden');
+    });
+
+    settingsModal.addEventListener('click', (e) => {
+      if (e.target === settingsModal) {
+        settingsModal.classList.add('hidden');
+      }
+    });
+
+    settingsForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const newWeight = parseFloat(document.getElementById('setupStartWeight').value);
+      const newDate = document.getElementById('setupStartDate').value;
+
+      if (!isNaN(newWeight) && newDate) {
+        appState.startWeight = newWeight;
+        appState.startDate = newDate;
+
+        // If no logs, seed day 0
+        if (appState.logs.length === 0) {
+          appState.logs.push({
+            id: Date.now().toString(),
+            date: newDate,
+            weight: newWeight,
+            notes: "Program start"
+          });
+        }
+
+        saveState();
+        render();
+        settingsModal.classList.add('hidden');
+        showToast("Program settings saved!");
+      }
+    });
+
+    resetDataBtn.addEventListener('click', () => {
+      const confirmed = window.confirm("Reset all logs and settings to fresh defaults?");
+      if (confirmed) {
+        localStorage.removeItem(STORAGE_KEY);
+        loadState();
+        render();
+        showToast("Data reset", "🔄");
+      }
+    });
+
+    // Initialization
+    window.addEventListener('load', () => {
+      loadState();
+
+      // Default the input date to today
+      const todayISO = new Date().toISOString().split('T')[0];
+      logDateInput.value = todayISO;
+
+      render();
+    });
+  </script>
+</body>
+</html>
